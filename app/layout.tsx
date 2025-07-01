@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { ThemeProvider } from "@/components/global/theme-provider";
 import { ReactLenis } from "lenis/react";
+import { Toaster } from "sonner";
 
 export const metadata: Metadata = {
   title: "TopAiglons - RDC",
@@ -26,6 +27,7 @@ export default function RootLayout({
             <main className="relative isolate overflow-hidden">{children}</main>
           </ReactLenis>
         </ThemeProvider>
+        <Toaster />
       </body>
     </html>
   );

@@ -9,6 +9,8 @@ import Image from "next/image";
 import { signUpImage } from "@/assets";
 import { Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
+import { signupUser } from "@/app/(auth)/actions/signupUser";
+import { toast } from "sonner";
 
 export function RegisterForm({
   className,
@@ -16,31 +18,69 @@ export function RegisterForm({
 }: React.ComponentProps<"div">) {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
+  const [form, setForm] = useState({
+    name: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+  });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setLoading(true);
+    setError("");
+
+    try {
+      const data = await signupUser(form);
+      toast.success(data.message);
+    } catch (err: any) {
+      toast.error(err.message || "Failed to sign up");
+    } finally {
+      setLoading(false);
+    }
+  }
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card className="overflow-hidden p-0">
         <CardContent className="grid p-0 md:grid-cols-2">
-          <form className="p-6 md:p-8">
+          <form onSubmit={handleSubmit} className="p-6 md:p-8">
             <div className="flex flex-col gap-6">
               <div className="flex flex-col items-center text-center">
-                <h1 className="text-2xl font-semibold">Welcome to TopAiglons</h1>
+                <h1 className="text-2xl font-semibold">
+                  Welcome to TopAiglons
+                </h1>
                 <p className="text-muted-foreground text-balance">
                   Create your TopAiglons Account
                 </p>
               </div>
               <div className="grid gap-2">
-                <Input id="name" type="text" placeholder="Full Name" />
+                <Input
+                  type="text"
+                  placeholder="Full Name"
+                  value={form.name}
+                  onChange={(e) => setForm({ ...form, name: e.target.value })}
+                />
               </div>
               <div className="grid gap-2">
-                <Input id="email" type="email" placeholder="m@example.com" />
+                <Input
+                  type="email"
+                  placeholder="m@example.com"
+                  value={form.email}
+                  onChange={(e) => setForm({ ...form, email: e.target.value })}
+                />
               </div>
               <div className="grid gap-2 relative">
                 <Input
-                  id="password"
                   type={showPassword ? "text" : "password"}
                   placeholder="Create Password"
                   className="pr-10"
+                  value={form.password}
+                  onChange={(e) =>
+                    setForm({ ...form, password: e.target.value })
+                  }
                 />
                 <button
                   type="button"
@@ -56,10 +96,14 @@ export function RegisterForm({
               </div>
               <div className="grid gap-2 relative">
                 <Input
-                  id="confirm-password"
+                  id="confirmPassword"
                   type={showConfirm ? "text" : "password"}
                   placeholder="Confirm Password"
                   className="pr-10"
+                  value={form.confirmPassword}
+                  onChange={(e) =>
+                    setForm({ ...form, confirmPassword: e.target.value })
+                  }
                 />
                 <button
                   type="button"
@@ -73,8 +117,8 @@ export function RegisterForm({
                   )}
                 </button>
               </div>
-              <Button type="submit" className="w-full">
-                Create Account
+              <Button type="submit" className="w-full" disabled={loading}>
+                {loading ? "Signing up..." : "Sign Up"}
               </Button>
               <div className="after:border-border relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t">
                 <span className="bg-card text-muted-foreground relative z-10 px-2">
@@ -145,6 +189,7 @@ export function RegisterForm({
         By clicking continue, you agree to our <a href="#">Terms of Service</a>{" "}
         and <a href="#">Privacy Policy</a>.
       </div>
+      {/* {error && <p className="text-red-500">{error}</p>} */}
     </div>
   );
 }
