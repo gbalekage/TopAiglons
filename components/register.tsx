@@ -1,3 +1,5 @@
+"use client";
+
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -5,11 +7,16 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Image from "next/image";
 import { signUpImage } from "@/assets";
+import { Eye, EyeOff } from "lucide-react";
+import { useState } from "react";
 
 export function RegisterForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
+
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card className="overflow-hidden p-0">
@@ -28,19 +35,43 @@ export function RegisterForm({
               <div className="grid gap-2">
                 <Input id="email" type="email" placeholder="m@example.com" />
               </div>
-              <div className="grid gap-2">
+              <div className="grid gap-2 relative">
                 <Input
                   id="password"
-                  type="password"
+                  type={showPassword ? "text" : "password"}
                   placeholder="Create Password"
+                  className="pr-10"
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((prev) => !prev)}
+                  className="absolute right-3 top-2.5 text-muted-foreground"
+                >
+                  {showPassword ? (
+                    <EyeOff className="h-5 w-5" />
+                  ) : (
+                    <Eye className="h-5 w-5" />
+                  )}
+                </button>
               </div>
-              <div className="grid gap-2">
+              <div className="grid gap-2 relative">
                 <Input
-                  id="password"
-                  type="password"
+                  id="confirm-password"
+                  type={showConfirm ? "text" : "password"}
                   placeholder="Confirm Password"
+                  className="pr-10"
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirm((prev) => !prev)}
+                  className="absolute right-3 top-2.5 text-muted-foreground"
+                >
+                  {showConfirm ? (
+                    <EyeOff className="h-5 w-5" />
+                  ) : (
+                    <Eye className="h-5 w-5" />
+                  )}
+                </button>
               </div>
               <Button type="submit" className="w-full">
                 Create Account
@@ -94,9 +125,9 @@ export function RegisterForm({
                 </Button>
               </div>
               <div className="text-center text-sm">
-                Don&apos;t have an account?{" "}
-                <a href="#" className="underline underline-offset-4">
-                  Sign up
+                Already have an account?{" "}
+                <a href="/sign-in" className="underline underline-offset-4">
+                  Sign in
                 </a>
               </div>
             </div>

@@ -1,15 +1,19 @@
-import { GalleryVerticalEnd } from "lucide-react";
+"use client";
 
+import React, { useState } from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Logo from "./global/logo";
+import { Eye, EyeOff } from "lucide-react";
 
 export function LoginForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
+  const [showPassword, setShowPassword] = useState(false);
+
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <form>
@@ -29,9 +33,27 @@ export function LoginForm({
               <Label htmlFor="email">Email</Label>
               <Input id="email" type="email" placeholder="m@example.com" />
             </div>
-            <div className="grid gap-2">
+            <div className="grid gap-2 relative">
               <Label htmlFor="password">Password</Label>
-              <Input id="password" type="password" placeholder="" />
+              <Input
+                id="password"
+                type={showPassword ? "text" : "password"}
+                placeholder="Password"
+                className="pr-10"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 text-muted-foreground cursor-pointer"
+                tabIndex={-1}
+                aria-label={showPassword ? "Hide password" : "Show password"}
+              >
+                {showPassword ? (
+                  <EyeOff className="h-5 w-5" />
+                ) : (
+                  <Eye className="h-5 w-5" />
+                )}
+              </button>
             </div>
             <Button type="submit" className="w-full">
               Login
@@ -62,7 +84,7 @@ export function LoginForm({
               </svg>
               Github
             </Button>
-            
+
             <Button variant="outline" type="button" className="w-full">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
