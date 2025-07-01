@@ -1,7 +1,5 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import Header from "@/components/global/header";
-import Footer from "@/components/global/footer";
 import { ThemeProvider } from "@/components/global/theme-provider";
 import { ReactLenis } from "lenis/react";
 
@@ -25,9 +23,7 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <ReactLenis root>
-            <Header />
             <main className="relative isolate overflow-hidden">{children}</main>
-            <Footer />
           </ReactLenis>
         </ThemeProvider>
       </body>

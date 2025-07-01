@@ -1,3 +1,5 @@
+import Footer from "@/components/global/footer";
+import Header from "@/components/global/header";
 import Blog from "@/components/home/blog";
 import CallToAction from "@/components/home/cta";
 import Faq from "@/components/home/faq";
@@ -12,6 +14,7 @@ type Props = {};
 const HomePage = (props: Props) => {
   return (
     <>
+      <Header />
       <Hero />
       <Features />
       <Process />
@@ -19,6 +22,7 @@ const HomePage = (props: Props) => {
       <Blog />
       <Faq />
       <CallToAction />
+      <Footer />
     </>
   );
 };

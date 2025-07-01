@@ -8,7 +8,14 @@ const Footer = () => {
     <footer className="section !pb-0">
       <div className="container">
         <div className="grid grid-cols-1 gap-x-2 gap-y-10 lg:grid-cols-4">
-          <Logo variant="default" />
+          <div>
+            <Logo variant="default" />
+            <p className="text-muted-foreground max-w-[240px] mt-4 ">
+              Lorem ipsum dolor sit amet consectetur adipisicing elit. Commodi
+              laborum voluptatem rem, pariatur eveniet nam. Pariatur vitae
+              magnam dolores soluta.
+            </p>
+          </div>
 
           <div className="grid grid-cols-2 gap-x-2 gap-y-8 text-sm sm:grid-cols-4 lg:col-span-3">
             {footerData.links.map(({ title, items }, index) => (
