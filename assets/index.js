@@ -1,6 +1,8 @@
 import favicon from "./favicon.svg";
 import logo from "./logo_light.svg";
-import icon from "./icon.png";
+import logoDark from "./logo_dark.svg";
+import iconDark from "./icon.png";
+import icon from "./icon-light.png";
 import heroBanner from "./hero-banner.png";
 import brand1 from "./brand-logo-1.svg";
 import brand2 from "./brand-logo-2.svg";
@@ -18,6 +20,7 @@ import avatar1 from "./avatar-1.jpg";
 import avatar2 from "./avatar-2.jpg";
 import avatar3 from "./avatar-3.jpg";
 import ctaBanner from "./cta-banner.png";
+import signUpImage from './signup.jpg'
 
 const brands = [brand1, brand2, brand3, brand4, brand5];
 
@@ -38,4 +41,8 @@ export {
   avatar2,
   avatar3,
   ctaBanner,
+  signUpImage,
+  logoDark,
+  iconDark
+
 };

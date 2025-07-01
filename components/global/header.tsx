@@ -22,7 +22,7 @@ const Header = () => {
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-background h-16 grid grid-cols-1 items-center md:h-20 lg:h-24">
       <div className="container flex justify-between">
-        <Logo variant="default" />
+        <Logo />
 
         {/* navigation menu */}
         <NavigationMenu className="max-lg:hidden mx-auto">
