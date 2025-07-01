@@ -24,7 +24,7 @@ export function RegisterForm({
           <form className="p-6 md:p-8">
             <div className="flex flex-col gap-6">
               <div className="flex flex-col items-center text-center">
-                <h1 className="text-2xl font-bold">Welcome to TopAiglons</h1>
+                <h1 className="text-2xl font-semibold">Welcome to TopAiglons</h1>
                 <p className="text-muted-foreground text-balance">
                   Create your TopAiglons Account
                 </p>

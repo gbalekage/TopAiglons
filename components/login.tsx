@@ -20,7 +20,7 @@ export function LoginForm({
         <div className="flex flex-col gap-6">
           <div className="flex flex-col items-center gap-2">
             <Logo variant="icon" />
-            <h1 className="text-xl font-bold">Welcome Back</h1>
+            <h1 className="text-xl font-semibold">Welcome Back</h1>
             <div className="text-center text-sm">
               Don&apos;t have an account?{" "}
               <a href="/sign-up" className="underline underline-offset-4">
@@ -60,7 +60,7 @@ export function LoginForm({
             </Button>
           </div>
           <a
-            href="#"
+            href="/forgot-password"
             className="text-xs text-center underline-offset-2 hover:underline"
           >
             Forgot your password?

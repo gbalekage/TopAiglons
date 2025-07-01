@@ -19,7 +19,7 @@ export function ResetForm({
         <div className="flex flex-col gap-6">
           <div className="flex flex-col items-center gap-2">
             <Logo variant="default" />
-            <h1 className="text-xl font-bold">Reset Your Password</h1>
+            <h1 className="text-xl font-semibold">Reset Your Password</h1>
           </div>
           <div className="flex flex-col gap-6">
             <div className="grid gap-2 relative">
