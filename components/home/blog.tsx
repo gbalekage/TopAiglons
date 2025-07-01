@@ -80,7 +80,7 @@ const Blog = () => {
                   </CardHeader>
 
                   <CardContent>
-                    <Badge className="mb-3">{badge}</Badge>
+                    <Badge className="mb-3 bg-blue-500">{badge}</Badge>
                     <CardTitle className="leading-normal">
                       <Link
                         className="hover:text-blue-500 transition-colors"

@@ -1,5 +1,5 @@
 import favicon from "./favicon.svg";
-import logo from "./logo.svg";
+import logo from "./logo_light.svg";
 import icon from "./icon.png";
 import heroBanner from "./hero-banner.png";
 import brand1 from "./brand-logo-1.svg";
