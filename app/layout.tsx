@@ -27,7 +27,7 @@ export default function RootLayout({
             <main className="relative isolate overflow-hidden">{children}</main>
           </ReactLenis>
         </ThemeProvider>
-        <Toaster />
+        <Toaster position="top-center" richColors closeButton />
       </body>
     </html>
   );
