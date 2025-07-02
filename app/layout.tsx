@@ -1,8 +1,8 @@
+// app/layout.tsx (RootLayout)
 import type { Metadata } from "next";
 import "./globals.css";
-import { ThemeProvider } from "@/components/global/theme-provider";
-import { ReactLenis } from "lenis/react";
 import { Toaster } from "sonner";
+import { ClientProviders } from "@/utils/ClientProviders";
 
 export const metadata: Metadata = {
   title: "TopAiglons - RDC",
@@ -16,17 +16,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={``}>
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
-          <ReactLenis root>
-            <main className="relative isolate overflow-hidden">{children}</main>
-          </ReactLenis>
-        </ThemeProvider>
+      <body>
+        <ClientProviders>
+          <main className="relative isolate overflow-hidden">{children}</main>
+        </ClientProviders>
         <Toaster position="top-center" richColors closeButton />
       </body>
     </html>

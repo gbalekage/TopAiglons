@@ -15,8 +15,9 @@ export async function signinUser(formData: {
       throw new Error("Failed to sign in");
     }
 
-    const token = response.data.token;
+    const { token, user } = response.data;
     localStorage.setItem("token", token);
+    localStorage.setItem("user", JSON.stringify(user));
 
     return response.data;
   } catch (error: any) {
