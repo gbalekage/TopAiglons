@@ -12,9 +12,16 @@ export interface IUser extends Document {
   verified?: boolean;
   verificationCode?: string;
   verificationTokenExpires?: Date;
+  lastLogin?: Date;
   resetToken?: string;
+  activityLogs?: {
+    action: string;
+    timestamp: Date;
+    divice?: string;
+    location?: string;
+  }[];
   resetTokenExpires?: Date;
-  role: "client" | "admin" | "manager";
+  role: "client" | "admin";
   organization?: string;
   hosting: Types.ObjectId[];
   domains: Types.ObjectId[];
@@ -33,8 +40,17 @@ const UserSchema = new Schema<IUser>(
     shippingAddress: { type: String },
     billingAddress: { type: String },
     verified: { type: Boolean, default: false },
+    lastLogin: { type: Date },
     verificationCode: { type: String },
     verificationTokenExpires: { type: Date },
+    activityLogs: [
+      {
+        action: { type: String, required: true },
+        timestamp: { type: Date, default: Date.now },
+        device: { type: String },
+        location: { type: String },
+      },
+    ],
     resetToken: { type: String },
     resetTokenExpires: { type: Date },
     role: {

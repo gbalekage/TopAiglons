@@ -6,17 +6,50 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Logo from "./global/logo";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, Loader2 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+import { signinUser } from "@/app/(auth)/actions/signinUser";
 
 export function LoginForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
+  const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
+  const [form, setForm] = useState({
+    email: "",
+    password: "",
+  });
+  const [loading, setLoading] = useState(false);
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setLoading(true);
+
+    try {
+      const data = await signinUser(form);
+      toast.success(data.message);
+
+      const role = data.user?.role;
+
+      if (role === "admin") {
+        router.push("/admin");
+      } else if (role === "client") {
+        router.push("/user");
+      } else {
+        router.push("/verify-email");
+      }
+    } catch (err: any) {
+      toast.error(err.message || "Failed to sign in");
+    } finally {
+      setLoading(false);
+    }
+  }
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
-      <form>
+      <form onSubmit={handleSubmit}>
         <div className="flex flex-col gap-6">
           <div className="flex flex-col items-center gap-2">
             <Logo variant="icon" />
@@ -31,15 +64,21 @@ export function LoginForm({
           <div className="flex flex-col gap-6">
             <div className="grid gap-2">
               <Label htmlFor="email">Email</Label>
-              <Input id="email" type="email" placeholder="m@example.com" />
+              <Input
+                type="email"
+                placeholder="m@example.com"
+                value={form.email}
+                onChange={(e) => setForm({ ...form, email: e.target.value })}
+              />
             </div>
             <div className="grid gap-2 relative">
               <Label htmlFor="password">Password</Label>
               <Input
-                id="password"
                 type={showPassword ? "text" : "password"}
                 placeholder="Password"
                 className="pr-10"
+                value={form.password}
+                onChange={(e) => setForm({ ...form, password: e.target.value })}
               />
               <button
                 type="button"
@@ -56,7 +95,14 @@ export function LoginForm({
               </button>
             </div>
             <Button type="submit" className="w-full">
-              Login
+              {loading ? (
+                <div className="flex items-center gap-2">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Signing in...
+                </div>
+              ) : (
+                "Sign In"
+              )}
             </Button>
           </div>
           <a

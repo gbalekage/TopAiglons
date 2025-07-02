@@ -31,7 +31,7 @@ export function VerifyCode({
     try {
       const data = await verifyEmail(form);
       toast.success(data.message);
-      router.push("/verify-email");
+      router.push("/sign-in");
     } catch (err: any) {
       toast.error(err.message || "Failed to verify email");
     } finally {
