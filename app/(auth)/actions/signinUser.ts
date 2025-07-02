@@ -10,7 +10,14 @@ export async function signinUser(formData: {
         "Content-Type": "application/json",
       },
     });
-    console.log("Response Data", response.data);
+
+    if (response.status !== 200) {
+      throw new Error("Failed to sign in");
+    }
+
+    const token = response.data.token;
+    localStorage.setItem("token", token);
+
     return response.data;
   } catch (error: any) {
     const message =
