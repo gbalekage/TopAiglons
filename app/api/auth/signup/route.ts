@@ -46,7 +46,7 @@ export async function POST(req: NextRequest) {
     await sendVerificationEmail(email, verificationCode);
 
     return NextResponse.json(
-      { message: "User created", user },
+      { message: `User created, verication code sent to ${email}`, user },
       { status: 201 }
     );
   } catch (err) {
