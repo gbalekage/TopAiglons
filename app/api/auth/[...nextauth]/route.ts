@@ -5,7 +5,7 @@ import User from "@/models/User";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
-// Helper to generate a default password for Google users
+// Helper to generate a random password for Google users
 const generateUniquePassword = () => {
   return `topaiglon-user${Math.floor(Math.random() * 1000)}`;
 };
@@ -18,19 +18,18 @@ const handler = NextAuth({
     }),
   ],
   pages: {
-    signIn: "/sign-in", // custom login page
+    signIn: "/sign-in", // your custom sign-in page
   },
   callbacks: {
-    // Create or update user on Google sign-in
+    // ✅ Called on sign-in
     async signIn({ user, account }) {
       await connectToDatabase();
 
       const existingUser = await User.findOne({ email: user.email });
-
       const hashedPassword = await bcrypt.hash(generateUniquePassword(), 10);
 
       if (!existingUser) {
-        await User.create({
+        const newUser = await User.create({
           name: user.name,
           email: user.email,
           password: hashedPassword,
@@ -39,45 +38,50 @@ const handler = NextAuth({
           verified: true,
           role: "client",
         });
+
+        // Pass required values to the jwt callback
+        user.id = newUser._id.toString();
+        user.role = newUser.role;
+      } else {
+        // Attach values for existing users too
+        user.id = existingUser._id.toString();
+        user.role = existingUser.role;
       }
 
       return true;
     },
 
-    // Attach token data (user ID, role, custom JWT)
+    // ✅ Called after signIn to create or update JWT
     async jwt({ token, user }) {
-      await connectToDatabase();
+      // When user is passed (only on signIn), populate custom fields
+      if (user) {
+        token.id = user.id;
+        token.role = user.role;
 
-      const email = user?.email || token.email;
-      const dbUser = await User.findOne({ email });
-
-      if (dbUser) {
-        token.id = dbUser._id.toString();
-        token.role = dbUser.role;
-
-        // ✅ Create a custom JWT token
+        // Create custom JWT
         token.accessToken = jwt.sign(
           {
-            id: dbUser._id,
-            email: dbUser.email,
-            role: dbUser.role,
+            id: user.id,
+            email: token.email,
+            role: user.role,
           },
           process.env.JWT_SECRET!,
           { expiresIn: "7d" }
         );
       }
 
-      console.log("✅ JWT Token with customToken:", token);
+      console.log("✅ JWT Token:", token);
       return token;
     },
 
-    // Attach token values to session object
+    // ✅ Called when session is created — attach token data
     async session({ session, token }) {
       if (token && session.user) {
         session.user.id = token.id;
         session.user.role = token.role;
         session.token = token.accessToken as string;
       }
+
       return session;
     },
   },
