@@ -1,83 +1,124 @@
-import { NextRequest, NextResponse } from "next/server";
-import bcrypt from "bcryptjs";
-import jwt from "jsonwebtoken";
+import NextAuth from "next-auth";
+import GoogleProvider from "next-auth/providers/google";
 import { connectToDatabase } from "@/lib/db";
 import User from "@/models/User";
+import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
 
-// Helper to extract IP from headers
-function getClientIp(req: NextRequest): string | null {
-  const forwarded = req.headers.get("x-forwarded-for");
-  return forwarded ? forwarded.split(",")[0].trim() : null;
-}
-
-export async function POST(req: NextRequest) {
-  try {
-    await connectToDatabase();
-
-    const { email, password } = await req.json();
-
-    if (!email || !password) {
-      return NextResponse.json({ error: "Missing fields" }, { status: 400 });
-    }
-
-    const existingUser = await User.findOne({ email });
-    if (!existingUser) {
-      return NextResponse.json(
-        { error: "User not found or invalid credentials" },
-        { status: 401 }
-      );
-    }
-
-    const passwordMatch = await bcrypt.compare(password, existingUser.password);
-    if (!passwordMatch) {
-      return NextResponse.json({ error: "Incorect Password" }, { status: 401 });
-    }
-
-    if (!existingUser.verified) {
-      return NextResponse.json(
-        { error: "Please verify your email before logging in." },
-        { status: 403 }
-      );
-    }
-
-    // Generate JWT
-    const token = jwt.sign(
-      {
-        id: existingUser._id,
-        email: existingUser.email,
-        role: existingUser.role,
-      },
-      process.env.JWT_SECRET!,
-      { expiresIn: "7d" }
-    );
-
-    // Get IP and device
-    const ipAddress = getClientIp(req) || "Unknown IP";
-    const userAgent = req.headers.get("user-agent") || "Unknown Device";
-
-    // Update login data
-    existingUser.lastLogin = new Date();
-    existingUser.activityLogs.push({
-      action: "Login",
-      timestamp: new Date(),
-      device: userAgent,
-      location: ipAddress,
-    });
-
-    await existingUser.save();
-
-    return NextResponse.json({
-      message: "Login successful, signing you in...",
-      user: {
-        id: existingUser._id,
-        name: existingUser.name,
-        email: existingUser.email,
-        role: existingUser.role,
-      },
-      token,
-    });
-  } catch (err) {
-    console.error(err);
-    return NextResponse.json({ error: "Server error" }, { status: 500 });
+// Extend the Session type to include 'token'
+import { Session } from "next-auth";
+declare module "next-auth" {
+  interface Session {
+    token?: string;
   }
 }
+
+// Generate a default random password for new Google users
+const generateUniquePassword = () => {
+  return `topaiglon-user${Math.floor(Math.random() * 1000)}`;
+};
+
+// Extract client IP address from request headers
+const getClientIp = (req: any): string | null => {
+  const forwarded = req.headers["x-forwarded-for"];
+  if (forwarded) return forwarded.split(",")[0].trim();
+  if (req.connection && req.connection.remoteAddress)
+    return req.connection.remoteAddress;
+  return null;
+};
+
+const handler = async (request: any, response: any) =>
+  NextAuth(request, response, {
+    providers: [
+      GoogleProvider({
+        clientId: process.env.GOOGLE_CLIENT_ID!,
+        clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+      }),
+    ],
+    pages: {
+      signIn: "/sign-in",
+    },
+    callbacks: {
+      async signIn({ user, account }) {
+        await connectToDatabase();
+
+        // Find user in DB by email
+        let existingUser = await User.findOne({ email: user.email });
+
+        const hashedPassword = await bcrypt.hash(generateUniquePassword(), 10);
+
+        // If new user, create account
+        if (!existingUser) {
+          existingUser = await User.create({
+            name: user.name,
+            email: user.email,
+            password: hashedPassword,
+            provider: account?.provider || "google",
+            image: user.image,
+            verified: true,
+            role: "client",
+            lastLogin: new Date(),
+            activityLogs: [
+              {
+                action: "Google SignIn",
+                timestamp: new Date(),
+                device: request?.headers["user-agent"] || "Unknown Device",
+                location: getClientIp(request) || "Unknown IP",
+              },
+            ],
+          });
+        } else {
+          // Existing user: update last login and logs
+          existingUser.lastLogin = new Date();
+          existingUser.activityLogs.push({
+            action: "Google SignIn",
+            timestamp: new Date(),
+            device: request?.headers["user-agent"] || "Unknown Device",
+            location: getClientIp(request) || "Unknown IP",
+          });
+          await existingUser.save();
+        }
+
+        return true;
+      },
+
+    async jwt({ token, user }) {
+      await connectToDatabase();
+
+      // Find user by email from token or user object
+      const email = user?.email || token.email;
+      const dbUser = await User.findOne({ email });
+
+      if (dbUser) {
+        token.id = dbUser._id.toString();
+        token.role = dbUser.role;
+
+        // Create a custom JWT token for your client app if needed
+        token.customToken = jwt.sign(
+          {
+            id: dbUser._id,
+            email: dbUser.email,
+            role: dbUser.role,
+          },
+          process.env.JWT_SECRET!,
+          { expiresIn: "7d" }
+        );
+      }
+
+      return token;
+    },
+
+    async session({ session, token }) {
+      session.user.id = token.id;
+      session.user.role = token.role;
+
+      // Attach your custom JWT token to session (optional)
+      session.token = typeof token.customToken === "string" ? token.customToken : undefined;
+
+      return session;
+    },
+  },
+  secret: process.env.NEXTAUTH_SECRET,
+});
+
+export { handler as GET, handler as POST };
