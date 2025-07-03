@@ -36,7 +36,7 @@ export function LoginForm({
       if (role === "admin") {
         setTimeout(() => router.push("/admin"), 1500);
       } else if (role === "client") {
-        setTimeout(() => router.push("/user"), 1500);
+        setTimeout(() => router.push("/client"), 1500);
       } else {
         setTimeout(() => router.push("/verify-email"), 1500);
       }

@@ -1,10 +1,16 @@
+"use client";
+
 import React from "react";
 import Logo from "./logo";
 import { Button } from "../ui/button";
-import { Menu } from "lucide-react";
+import { Menu, LogOut, User2 } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
-import MobileMenu from "./mobileMenu";
-import { navMenu } from "@/constants";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "../ui/dropdown-menu";
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -14,17 +20,40 @@ import {
   NavigationMenuTrigger,
   navigationMenuTriggerStyle,
 } from "../ui/navigation-menu";
+
 import Link from "next/link";
-import { Card, CardHeader } from "../ui/card";
+import MobileMenu from "./mobileMenu";
+import { navMenu } from "@/constants";
 import { ModeToggle } from "./theme";
+import { useUser } from "@/contexts/user";
+import { useRouter } from "next/navigation";
 
 const Header = () => {
+  const { user, setUser, setToken } = useUser();
+  const router = useRouter();
+
+  const handleLogout = () => {
+    localStorage.removeItem("user");
+    localStorage.removeItem("token");
+    setUser(null);
+    setToken(null);
+    // router.push("/sign-in");
+  };
+
+  const getInitials = (name: string) => {
+    return name
+      .split(" ")
+      .map((part) => part[0])
+      .join("")
+      .toUpperCase();
+  };
+
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-background h-16 grid grid-cols-1 items-center md:h-20 lg:h-24">
-      <div className="container flex justify-between">
+      <div className="container flex justify-between items-center">
         <Logo />
 
-        {/* navigation menu */}
+        {/* Navigation menu */}
         <NavigationMenu className="max-lg:hidden mx-auto">
           <NavigationMenuList>
             {navMenu.map(({ href, label, submenu }, index) => (
@@ -75,22 +104,51 @@ const Header = () => {
           </NavigationMenuList>
         </NavigationMenu>
 
-        {/* desk action button */}
-        <div className="flex items-center gap-2 justify-end max-lg:hidden">
-          <Button size={"sm"}>
-            <Link href={"/sign-in"}>Sign In</Link>
-          </Button>
+        {/* Right Actions */}
+        <div className="flex items-center gap-3 max-lg:hidden">
+          {user ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="outline"
+                  className="rounded-full w-9 h-9 p-0 text-sm font-bold"
+                >
+                  {getInitials(user.name)} 
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-40">
+                <DropdownMenuItem
+                  onClick={() =>
+                    router.push(user.role === "admin" ? "/admin" : "/client")
+                  }
+                >
+                  <User2 className="w-4 h-4 mr-2" />
+                  Dashboard
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={handleLogout}>
+                  <LogOut className="w-4 h-4 mr-2" />
+                  Logout
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
+            <>
+              <Button size="sm">
+                <Link href="/sign-in">Sign In</Link>
+              </Button>
+            </>
+          )}
 
           <ModeToggle />
         </div>
 
-        {/* mobile menu */}
+        {/* Mobile menu */}
         <Popover>
           <PopoverTrigger asChild>
             <Button
-              variant={"ghost"}
+              variant="ghost"
               className="cursor-pointer lg:hidden"
-              size={"icon"}
+              size="icon"
             >
               <Menu />
             </Button>
