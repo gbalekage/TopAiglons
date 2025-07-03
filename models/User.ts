@@ -55,7 +55,7 @@ const UserSchema = new Schema<IUser>(
     resetTokenExpires: { type: Date },
     role: {
       type: String,
-      enum: ["client", "admin", "manager"],
+      enum: ["client", "admin"],
       default: "client",
     },
     organization: { type: String },
