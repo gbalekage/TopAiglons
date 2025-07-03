@@ -28,8 +28,18 @@ import { ModeToggle } from "./theme";
 import { useUser } from "@/contexts/user";
 import { useRouter } from "next/navigation";
 
+type User = {
+  name: string;
+  role: string;
+  image?: string;
+};
+
 const Header = () => {
-  const { user, setUser, setToken } = useUser();
+  const { user, setUser, setToken } = useUser() as {
+    user: User | null;
+    setUser: (user: User | null) => void;
+    setToken: (token: string | null) => void;
+  };
   const router = useRouter();
 
   const handleLogout = () => {
@@ -111,9 +121,19 @@ const Header = () => {
               <DropdownMenuTrigger asChild>
                 <Button
                   variant="outline"
-                  className="rounded-full w-9 h-9 p-0 text-sm font-bold"
+                  className="rounded-full w-9 h-9 p-0 overflow-hidden"
                 >
-                  {getInitials(user.name)} 
+                  {user.image ? (
+                    <img
+                      src={user.image}
+                      alt={user.name}
+                      className="w-full h-full object-cover rounded-full"
+                    />
+                  ) : (
+                    <span className="text-sm font-bold">
+                      {getInitials(user.name)}
+                    </span>
+                  )}
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-40">
