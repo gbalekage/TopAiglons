@@ -43,6 +43,8 @@ export async function POST(req: NextRequest) {
 
     await user.save();
 
+    await sendVerificationEmail(email, verificationCode);
+
     return NextResponse.json(
       { message: `User created, verication code sent to ${email}`, user },
       { status: 201 }

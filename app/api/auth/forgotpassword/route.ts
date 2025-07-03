@@ -29,17 +29,27 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Generate reset token and expiration
-    const token = crypto.randomBytes(20).toString("hex");
-    const expiration = Date.now() + 15 * 60 * 1000; // 15 minutes
+    // Generate raw token
+    const token = crypto.randomBytes(32).toString("hex");
+    const expiration = Date.now() + 15 * 60 * 1000;
 
     const resetUrl = `${process.env.CLIENT_URL}/reset-password/${token}`;
 
+    // Set token and expiration
     user.resetToken = token;
     user.resetTokenExpires = expiration;
+
+    // ✅ Add activity log
+    user.activityLogs?.push({
+      action: "Requested password reset",
+      timestamp: new Date(),
+      device: req.headers.get("user-agent") || "Unknown device",
+      location: req.headers.get("x-forwarded-for") || "Unknown IP",
+    });
+
     await user.save();
 
-    await sendPasswordResetEmail(user.email, user.username, resetUrl);
+    await sendPasswordResetEmail(user.email, user.name, resetUrl);
 
     return NextResponse.json({
       message: "A reset link has been sent to your email address.",

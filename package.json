@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
-    "net": "next dev --turbopack --hostname 192.168.0.2",
+    "net": "next dev --turbopack --hostname 192.168.242.186",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"
@@ -71,6 +71,7 @@
   "devDependencies": {
     "@eslint/eslintrc": "^3",
     "@tailwindcss/postcss": "^4",
+    "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",

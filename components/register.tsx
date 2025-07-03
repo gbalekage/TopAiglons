@@ -34,7 +34,7 @@ export function RegisterForm({
     try {
       const data = await signupUser(form);
       toast.success(data.message);
-      router.push("/verify-email");
+      setTimeout(() => router.push("/verify-email"), 1500);
     } catch (err: any) {
       toast.error(err.message || "Failed to sign up");
     } finally {

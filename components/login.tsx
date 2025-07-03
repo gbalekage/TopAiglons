@@ -34,11 +34,11 @@ export function LoginForm({
       const role = data.user?.role;
 
       if (role === "admin") {
-        router.push("/admin");
+        setTimeout(() => router.push("/admin"), 1500);
       } else if (role === "client") {
-        router.push("/user");
+        setTimeout(() => router.push("/user"), 1500);
       } else {
-        router.push("/verify-email");
+        setTimeout(() => router.push("/verify-email"), 1500);
       }
     } catch (err: any) {
       toast.error(err.message || "Failed to sign in");
