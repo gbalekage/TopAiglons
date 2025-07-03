@@ -11,6 +11,7 @@ import Image from "next/image";
 import { signUpImage } from "@/assets";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { signIn } from "next-auth/react";
 
 export function RegisterForm({
   className,
@@ -26,6 +27,7 @@ export function RegisterForm({
     confirmPassword: "",
   });
   const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -41,6 +43,27 @@ export function RegisterForm({
       setLoading(false);
     }
   }
+
+  const handleGoogleSignIn = async () => {
+    try {
+      setGoogleLoading(true);
+
+      const result = await signIn("google", {
+        callbackUrl: "/", // ✅ on success, user goes to homepage
+        redirect: false, // ✅ we handle routing manually
+      });
+
+      if (result?.error) {
+        toast.error(result.error); // handle unexpected errors
+      } else {
+        router.push("/"); // success
+      }
+    } catch (error) {
+      toast.error("Google sign-in failed");
+    } finally {
+      setGoogleLoading(false);
+    }
+  };
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
@@ -132,9 +155,24 @@ export function RegisterForm({
                   <span className="sr-only">Login with GitHub</span>
                   GitHub
                 </Button>
-                <Button variant="outline" type="button" className="w-full">
-                  <span className="sr-only">Login with Google</span>
-                  Google
+                <Button
+                  onClick={handleGoogleSignIn}
+                  variant="outline"
+                  type="button"
+                  className="w-full"
+                  disabled={googleLoading}
+                >
+                  {googleLoading ? (
+                    <div className="flex items-center gap-2">
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      Signing in...
+                    </div>
+                  ) : (
+                    <>
+                      <span className="sr-only">Login with Google</span>
+                      Google
+                    </>
+                  )}
                 </Button>
               </div>
               <div className="text-center text-sm">
