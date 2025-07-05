@@ -27,6 +27,7 @@ import { navMenu } from "@/constants";
 import { ModeToggle } from "./theme";
 import { useUser } from "@/contexts/user";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 type User = {
   name: string;
@@ -41,6 +42,8 @@ const Header = () => {
     setToken: (token: string | null) => void;
   };
   const router = useRouter();
+  const userImage = user?.image || "";
+  console.log("User image:", userImage);
 
   const handleLogout = () => {
     localStorage.removeItem("user");
@@ -124,8 +127,10 @@ const Header = () => {
                   className="rounded-full w-9 h-9 p-0 overflow-hidden"
                 >
                   {user.image ? (
-                    <img
-                      src={user.image}
+                    <Image
+                      width={24}
+                      height={24}
+                      src={userImage}
                       alt={user.name}
                       className="w-full h-full object-cover rounded-full"
                     />
