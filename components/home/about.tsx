@@ -202,9 +202,9 @@ export default function AboutSectionCompanyValues() {
             variants={Variants.fadeInUp}
             initial="start"
             whileInView="end"
-            className="bg-primary/10 text-primary inline-block rounded-lg px-3 py-1 text-sm"
+            // className="bg-primary/10 text-primary inline-block rounded-lg px-3 py-1 text-sm"
           >
-            Core Values
+            Abous us
           </motion.div>
           <motion.h2
             variants={Variants.fadeInUp}
@@ -212,7 +212,7 @@ export default function AboutSectionCompanyValues() {
             whileInView="end"
             className="text-3xl font-bold tracking-tight md:text-4xl"
           >
-            What Guides Our Decisions
+            What about our company values?
           </motion.h2>
           <motion.p
             variants={Variants.fadeInUp}
@@ -220,9 +220,11 @@ export default function AboutSectionCompanyValues() {
             whileInView="end"
             className="text-muted-foreground"
           >
-            Our values aren&apos;t just words on a wall—they&apos;re the
-            principles that guide our daily actions and long-term vision,
-            shaping our culture and driving our success.
+            At Teck, our company values are the foundation of our culture and
+            guide everything we do. They reflect our commitment to innovation,
+            integrity, collaboration, customer focus, excellence, and
+            sustainability. Each value is not just a statement but a principle
+            that shapes our actions and decisions every day.
           </motion.p>
         </div>
 
