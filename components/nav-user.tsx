@@ -27,6 +27,8 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { toast } from "sonner";
+import { useUser } from "@/contexts/user";
+import { Loader2 } from "lucide-react";
 
 type User = {
   id: string;
@@ -41,6 +43,27 @@ export function NavUser({ user }: { user: User }) {
   const userId = user?.id || "";
   const [dbUser, setDbUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+
+  const { setUser, setToken } = useUser() as {
+    user: User | null;
+    setUser: (user: User | null) => void;
+    setToken: (token: string | null) => void;
+  };
+
+  const handleLogout = () => {
+    setLoading(true);
+    try {
+      localStorage.removeItem("user");
+      localStorage.removeItem("token");
+      setUser(null);
+      setToken(null);
+      router.push("/");
+    } catch (error) {
+      toast.error("Error signing out the user");
+    } finally {
+      setLoading(true);
+    }
+  };
 
   useEffect(() => {
     const getUser = async () => {
@@ -126,9 +149,18 @@ export function NavUser({ user }: { user: User }) {
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
-              <IconLogout />
-              Log out
+            <DropdownMenuItem onClick={handleLogout}>
+              {loading ? (
+                <div className="flex items-center gap-1">
+                  <Loader2 className="animate-spin " />
+                  <small>Signing out...</small>
+                </div>
+              ) : (
+                <>
+                  <IconLogout />
+                  Log out
+                </>
+              )}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
