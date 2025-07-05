@@ -9,9 +9,12 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
+import Link from "next/link";
+import { IconDetails } from "@tabler/icons-react";
+import { Eye, Pencil, Trash2 } from "lucide-react";
 
 type User = {
-  id: number;
+  id: string;
   name: string;
   phone: string;
   address: string;
@@ -44,11 +47,16 @@ export function DataTable({ data }: { data: User[] }) {
               <TableCell>{user.role}</TableCell>
               <TableCell>{user.status}</TableCell>
               <TableCell className="flex gap-4">
-                <Button size="sm" variant="outline">
-                  Détails
+                <Link href={`/admin/users/user-details/${user.id}`}>
+                  <Button variant="outline">
+                    <Eye />
+                  </Button>
+                </Link>
+                <Button>
+                  <Pencil />
                 </Button>
-                <Button size="sm" variant="destructive">
-                  Delete
+                <Button variant="destructive">
+                  <Trash2 />
                 </Button>
               </TableCell>
             </TableRow>
