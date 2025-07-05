@@ -87,6 +87,7 @@ const Process = () => {
                 src={processBanner}
                 alt="Process Banner"
                 className="w-full h-full object-contain object-bottom"
+                priority
               />
             </motion.figure>
           </div>

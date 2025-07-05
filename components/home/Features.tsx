@@ -92,7 +92,7 @@ const Features = (props: Props) => {
                       variants={Variants.fadeInUp}
                       className="p-6 pt-0"
                     >
-                      <Image src={imgSrc} alt={title} />
+                      <Image src={imgSrc} alt={title} priority />
                     </motion.figure>
                   )}
                 </>

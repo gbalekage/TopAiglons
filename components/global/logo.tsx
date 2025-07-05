@@ -42,7 +42,7 @@ const Logo = ({ variant = "default" }: Props) => {
 
   return (
     <Link href="/" className="">
-      <Image src={getImage()} alt="logo" {...imageProps} />
+      <Image src={getImage()} alt="logo" {...imageProps} priority />
     </Link>
   );
 };

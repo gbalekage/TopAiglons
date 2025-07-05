@@ -128,6 +128,7 @@ const Hero = () => {
               alt="Hero Banner"
               width={1468}
               height={816}
+              priority
             />
           </motion.figure>
 

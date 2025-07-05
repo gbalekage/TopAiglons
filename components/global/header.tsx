@@ -43,7 +43,6 @@ const Header = () => {
   };
   const router = useRouter();
   const userImage = user?.image || "";
-  console.log("User image:", userImage);
 
   const handleLogout = () => {
     localStorage.removeItem("user");
@@ -133,6 +132,7 @@ const Header = () => {
                       src={userImage}
                       alt={user.name}
                       className="w-full h-full object-cover rounded-full"
+                      priority
                     />
                   ) : (
                     <span className="text-sm font-bold">
