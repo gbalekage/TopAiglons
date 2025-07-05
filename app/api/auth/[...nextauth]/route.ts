@@ -1,49 +1,139 @@
-import NextAuth from "next-auth";
+import NextAuth, { NextAuthOptions, User as NextAuthUser } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
+import CredentialsProvider from "next-auth/providers/credentials";
+import { JWT } from "next-auth/jwt";
 import { connectToDatabase } from "@/lib/db";
 import User from "@/models/User";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import { NextApiRequest, NextApiResponse } from "next";
 
-// Helper to generate a random password for Google users
-const generateUniquePassword = () => {
-  return `topaiglon-user${Math.floor(Math.random() * 1000)}`;
+// Extend session and token types
+declare module "next-auth" {
+  interface Session {
+    token?: string;
+    user: {
+      id: string;
+      name?: string | null;
+      email: string;
+      role?: string;
+    };
+  }
+
+  interface User {
+    id?: string;
+    role?: string;
+  }
+}
+
+declare module "next-auth/jwt" {
+  interface JWT {
+    id?: string;
+    role?: string;
+    accessToken?: string;
+  }
+}
+
+// Helper functions
+const generateUniquePassword = () =>
+  `topaiglon-user${Math.floor(Math.random() * 1000)}`;
+
+const getClientIp = (req: NextApiRequest): string | null => {
+  const forwarded = req.headers["x-forwarded-for"];
+  if (typeof forwarded === "string") return forwarded.split(",")[0].trim();
+  if (req.socket?.remoteAddress) return req.socket.remoteAddress;
+  return null;
 };
 
-const handler = NextAuth({
+// Auth options
+const authOptions: NextAuthOptions = {
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID!,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
     }),
-  ],
-  pages: {
-    signIn: "/sign-in", // your custom sign-in page
-  },
-  callbacks: {
-    // ✅ Called on sign-in
-    async signIn({ user, account }) {
-      await connectToDatabase();
+    CredentialsProvider({
+      name: "Credentials",
+      credentials: {
+        email: { label: "Email", type: "text" },
+        password: { label: "Password", type: "password" },
+      },
+      async authorize(credentials, req) {
+        if (!credentials?.email || !credentials?.password) return null;
 
-      const existingUser = await User.findOne({ email: user.email });
-      const hashedPassword = await bcrypt.hash(generateUniquePassword(), 10);
+        await connectToDatabase();
 
-      if (!existingUser) {
-        const newUser = await User.create({
+        const user = await User.findOne({ email: credentials.email });
+        if (!user) throw new Error("Invalid email or password");
+
+        const isValid = await bcrypt.compare(
+          credentials.password,
+          user.password
+        );
+        if (!isValid) throw new Error("Invalid email or password");
+
+        // Log login
+        user.lastLogin = new Date();
+        user.activityLogs.push({
+          action: "Credentials SignIn",
+          timestamp: new Date(),
+          device: req?.headers["user-agent"] || "Unknown Device",
+          location: getClientIp(req as NextApiRequest) || "Unknown IP",
+        });
+        await user.save();
+
+        return {
+          id: user._id.toString(),
           name: user.name,
           email: user.email,
-          password: hashedPassword,
-          provider: account?.provider || "google",
-          image: user.image,
-          verified: true,
-          role: "client",
-        });
+          role: user.role,
+        };
+      },
+    }),
+  ],
 
-        // Pass required values to the jwt callback
-        user.id = newUser._id.toString();
-        user.role = newUser.role;
-      } else {
-        // Attach values for existing users too
+  pages: {
+    signIn: "/sign-in",
+  },
+
+  callbacks: {
+    async signIn({ user, account, profile }) {
+      if (account?.provider === "google") {
+        await connectToDatabase();
+
+        let existingUser = await User.findOne({ email: user.email });
+        const hashedPassword = await bcrypt.hash(generateUniquePassword(), 10);
+
+        if (!existingUser) {
+          existingUser = await User.create({
+            name: user.name,
+            email: user.email,
+            password: hashedPassword,
+            provider: "google",
+            image: user.image,
+            verified: true,
+            role: "client",
+            lastLogin: new Date(),
+            activityLogs: [
+              {
+                action: "Google SignIn",
+                timestamp: new Date(),
+                device: "",
+                location: "Unknown",
+              },
+            ],
+          });
+        } else {
+          existingUser.lastLogin = new Date();
+          existingUser.activityLogs.push({
+            action: "Google SignIn",
+            timestamp: new Date(),
+            device: "",
+            location: "Unknown",
+          });
+          await existingUser.save();
+        }
+
         user.id = existingUser._id.toString();
         user.role = existingUser.role;
       }
@@ -51,14 +141,11 @@ const handler = NextAuth({
       return true;
     },
 
-    // ✅ Called after signIn to create or update JWT
     async jwt({ token, user }) {
-      // When user is passed (only on signIn), populate custom fields
       if (user) {
         token.id = user.id;
         token.role = user.role;
 
-        // Create custom JWT
         token.accessToken = jwt.sign(
           {
             id: user.id,
@@ -69,23 +156,23 @@ const handler = NextAuth({
           { expiresIn: "7d" }
         );
       }
-
-      console.log("✅ JWT Token:", token);
       return token;
     },
 
-    // ✅ Called when session is created — attach token data
     async session({ session, token }) {
-      if (token && session.user) {
-        session.user.id = token.id;
+      if (session.user && token) {
+        session.user.id = token.id!;
         session.user.role = token.role;
-        session.token = token.accessToken as string;
+        session.token = token.accessToken;
       }
-
       return session;
     },
   },
+
   secret: process.env.NEXTAUTH_SECRET,
-});
+};
+
+const handler = async (req: NextApiRequest, res: NextApiResponse) =>
+  NextAuth(req, res, authOptions);
 
 export { handler as GET, handler as POST };

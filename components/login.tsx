@@ -9,7 +9,6 @@ import Logo from "./global/logo";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { signinUser } from "@/app/(auth)/actions/signinUser";
 import { getSession, signIn } from "next-auth/react";
 
 export function LoginForm({
@@ -30,20 +29,34 @@ export function LoginForm({
     setLoading(true);
 
     try {
-      const data = await signinUser(form);
-      toast.success(data.message);
+      const result = await signIn("credentials", {
+        redirect: false,
+        email: form.email,
+        password: form.password,
+      });
 
-      const role = data.user?.role;
-
-      if (role === "admin") {
-        setTimeout(() => router.push("/admin"), 1500);
-      } else if (role === "client") {
-        setTimeout(() => router.push("/client"), 1500);
+      if (result?.error) {
+        toast.error(result.error);
       } else {
-        setTimeout(() => router.push("/verify-email"), 1500);
+        const session = await getSession();
+
+        if (session) {
+          localStorage.setItem("token", session.token ?? "");
+          localStorage.setItem("user", JSON.stringify(session.user));
+
+          const role = session.user.role;
+
+          if (role === "admin") {
+            router.push("/admin");
+          } else if (role === "client") {
+            router.push("/client");
+          } else {
+            router.push("/verify-email");
+          }
+        }
       }
-    } catch (err: any) {
-      toast.error(err.message || "Failed to sign in");
+    } catch (error) {
+      toast.error("Login failed");
     } finally {
       setLoading(false);
     }
@@ -54,22 +67,29 @@ export function LoginForm({
       setGoogleLoading(true);
 
       const result = await signIn("google", {
-        callbackUrl: "/", // redirect after sign-in success
-        redirect: false, // handle redirect manually
+        callbackUrl: "/", // or use /client, /admin, etc.
+        redirect: false,
       });
 
       if (result?.error) {
         toast.error(result.error);
       } else {
-        // Fetch the session after successful sign-in
         const session = await getSession();
+
         if (session) {
           localStorage.setItem("token", session.token ?? "");
           localStorage.setItem("user", JSON.stringify(session.user));
-        }
 
-        // Redirect to home page
-        router.push("/");
+          const role = session.user.role;
+
+          if (role === "admin") {
+            router.push("/admin");
+          } else if (role === "client") {
+            router.push("/client");
+          } else {
+            router.push("/verify-email");
+          }
+        }
       }
     } catch (error) {
       toast.error("Google sign-in failed");
@@ -80,7 +100,7 @@ export function LoginForm({
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} autoComplete="on">
         <div className="flex flex-col gap-6">
           <div className="flex flex-col items-center gap-2">
             <Logo variant="icon" />
@@ -92,24 +112,30 @@ export function LoginForm({
               </a>
             </div>
           </div>
+
           <div className="flex flex-col gap-6">
             <div className="grid gap-2">
               <Label htmlFor="email">Email</Label>
               <Input
+                name="email"
                 type="email"
                 placeholder="m@example.com"
                 value={form.email}
                 onChange={(e) => setForm({ ...form, email: e.target.value })}
+                required
               />
             </div>
+
             <div className="grid gap-2 relative">
               <Label htmlFor="password">Password</Label>
               <Input
+                name="password"
                 type={showPassword ? "text" : "password"}
                 placeholder="Password"
                 className="pr-10"
                 value={form.password}
                 onChange={(e) => setForm({ ...form, password: e.target.value })}
+                required
               />
               <button
                 type="button"
@@ -125,6 +151,7 @@ export function LoginForm({
                 )}
               </button>
             </div>
+
             <Button type="submit" className="w-full">
               {loading ? (
                 <div className="flex items-center gap-2">
@@ -136,18 +163,21 @@ export function LoginForm({
               )}
             </Button>
           </div>
+
           <a
             href="/forgot-password"
             className="text-xs text-center underline-offset-2 hover:underline"
           >
             Forgot your password?
           </a>
+
           <div className="after:border-border relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t">
             <span className="bg-background text-muted-foreground relative z-10 px-2">
               Or
             </span>
           </div>
-          <div className="">
+
+          <div>
             <Button
               onClick={handleGoogleSignIn}
               variant="outline"
@@ -164,36 +194,45 @@ export function LoginForm({
                 <>
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
-                    x="0px"
-                    y="0px"
-                    width="100"
-                    height="100"
+                    width="20"
+                    height="20"
                     viewBox="0 0 48 48"
+                    className="mr-2"
                   >
                     <path
                       fill="#FFC107"
-                      d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12c0-6.627,5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24c0,11.045,8.955,20,20,20c11.045,0,20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z"
+                      d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12
+                    c0-6.627,5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4
+                    C12.955,4,4,12.955,4,24c0,11.045,8.955,20,20,20c11.045,0,20-8.955,20-20
+                    C44,22.659,43.862,21.35,43.611,20.083z"
                     ></path>
                     <path
                       fill="#FF3D00"
-                      d="M6.306,14.691l6.571,4.819C14.655,15.108,18.961,12,24,12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z"
+                      d="M6.306,14.691l6.571,4.819C14.655,15.108,18.961,12,24,12
+                    c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657
+                    C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z"
                     ></path>
                     <path
                       fill="#4CAF50"
-                      d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36c-5.202,0-9.619-3.317-11.283-7.946l-6.522,5.025C9.505,39.556,16.227,44,24,44z"
+                      d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238
+                    C29.211,35.091,26.715,36,24,36c-5.202,0-9.619-3.317-11.283-7.946
+                    l-6.522,5.025C9.505,39.556,16.227,44,24,44z"
                     ></path>
                     <path
                       fill="#1976D2"
-                      d="M43.611,20.083H42V20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.571c0.001-0.001,0.002-0.001,0.003-0.002l6.19,5.238C36.971,39.205,44,34,44,24C44,22.659,43.862,21.35,43.611,20.083z"
+                      d="M43.611,20.083H42V20H24v8h11.303
+                    c-0.792,2.237-2.231,4.166-4.087,5.571l6.19,5.238C36.971,39.205,44,34,44,24
+                    C44,22.659,43.862,21.35,43.611,20.083z"
                     ></path>
                   </svg>
-                  Google
+                  Sign in with Google
                 </>
               )}
             </Button>
           </div>
         </div>
       </form>
+
       <div className="text-muted-foreground *:[a]:hover:text-primary text-center text-xs text-balance *:[a]:underline *:[a]:underline-offset-4">
         By clicking continue, you agree to our <a href="#">Terms of Service</a>{" "}
         and <a href="#">Privacy Policy</a>.

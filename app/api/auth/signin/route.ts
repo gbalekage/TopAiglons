@@ -82,43 +82,44 @@ const handler = async (request: any, response: any) =>
         return true;
       },
 
-    async jwt({ token, user }) {
-      await connectToDatabase();
+      async jwt({ token, user }) {
+        await connectToDatabase();
 
-      // Find user by email from token or user object
-      const email = user?.email || token.email;
-      const dbUser = await User.findOne({ email });
+        // Find user by email from token or user object
+        const email = user?.email || token.email;
+        const dbUser = await User.findOne({ email });
 
-      if (dbUser) {
-        token.id = dbUser._id.toString();
-        token.role = dbUser.role;
+        if (dbUser) {
+          token.id = dbUser._id.toString();
+          token.role = dbUser.role;
 
-        // Create a custom JWT token for your client app if needed
-        token.customToken = jwt.sign(
-          {
-            id: dbUser._id,
-            email: dbUser.email,
-            role: dbUser.role,
-          },
-          process.env.JWT_SECRET!,
-          { expiresIn: "7d" }
-        );
-      }
+          // Create a custom JWT token for your client app if needed
+          token.customToken = jwt.sign(
+            {
+              id: dbUser._id,
+              email: dbUser.email,
+              role: dbUser.role,
+            },
+            process.env.JWT_SECRET!,
+            { expiresIn: "7d" }
+          );
+        }
 
-      return token;
+        return token;
+      },
+
+      async session({ session, token }) {
+        session.user.id = token.id;
+        session.user.role = token.role;
+
+        // Attach your custom JWT token to session (optional)
+        session.token =
+          typeof token.customToken === "string" ? token.customToken : undefined;
+
+        return session;
+      },
     },
-
-    async session({ session, token }) {
-      session.user.id = token.id;
-      session.user.role = token.role;
-
-      // Attach your custom JWT token to session (optional)
-      session.token = typeof token.customToken === "string" ? token.customToken : undefined;
-
-      return session;
-    },
-  },
-  secret: process.env.NEXTAUTH_SECRET,
-});
+    secret: process.env.NEXTAUTH_SECRET,
+  });
 
 export { handler as GET, handler as POST };
