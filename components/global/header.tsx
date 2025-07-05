@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Logo from "./logo";
 import { Button } from "../ui/button";
 import { Menu, LogOut, User2 } from "lucide-react";
@@ -28,8 +28,11 @@ import { ModeToggle } from "./theme";
 import { useUser } from "@/contexts/user";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import axios from "axios";
+import { toast } from "sonner";
 
 type User = {
+  id: string;
   name: string;
   role: string;
   image?: string;
@@ -41,12 +44,26 @@ const Header = () => {
     setUser: (user: User | null) => void;
     setToken: (token: string | null) => void;
   };
+  const [dbUser, setDbUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
+  const userId = user?.id || "";
+
   const router = useRouter();
-  const userImage = user?.image || (
-    <div className="w-6 h-6 bg-white rounded-full flex items-center justify-center">
-      <User2 className="w-6 h-6" />
-    </div>
-  );
+
+  useEffect(() => {
+    const getUser = async () => {
+      try {
+        const response = await axios.get(`/api/user/${userId}`);
+        setDbUser(response.data);
+      } catch (err: any) {
+        toast.error(err.response?.data?.error || "Error fetching user");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (userId) getUser();
+  }, [userId]);
 
   const handleLogout = () => {
     localStorage.removeItem("user");
@@ -129,17 +146,17 @@ const Header = () => {
                   variant="outline"
                   className="rounded-full w-9 h-9 p-0 overflow-hidden"
                 >
-                  {user.image ? (
+                  {dbUser?.image ? (
                     <Image
-                      width={24}
-                      height={24}
-                      src={userImage}
+                      width={36}
+                      height={36}
+                      src={dbUser.image}
                       alt={user.name}
                       className="w-full h-full object-cover rounded-full"
                       priority
                     />
                   ) : (
-                    <span className="text-sm font-bold">
+                    <span className="text-sm font-bold w-full h-full flex items-center justify-center">
                       {getInitials(user.name)}
                     </span>
                   )}
@@ -148,7 +165,9 @@ const Header = () => {
               <DropdownMenuContent align="end" className="w-40">
                 <DropdownMenuItem
                   onClick={() =>
-                    router.push(user.role === "admin" ? "/admin/home" : "/client")
+                    router.push(
+                      user.role === "admin" ? "/admin/home" : "/client"
+                    )
                   }
                 >
                   <User2 className="w-4 h-4 mr-2" />
@@ -161,11 +180,9 @@ const Header = () => {
               </DropdownMenuContent>
             </DropdownMenu>
           ) : (
-            <>
-              <Button size="sm">
-                <Link href="/sign-in">Sign In</Link>
-              </Button>
-            </>
+            <Button size="sm">
+              <Link href="/sign-in">Sign In</Link>
+            </Button>
           )}
 
           <ModeToggle />
