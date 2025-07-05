@@ -35,6 +35,7 @@ import {
 import { useUser } from "@/contexts/user";
 
 type User = {
+  id: string;
   name: string;
   role: string;
   image?: string;
@@ -55,6 +56,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       name: user?.name ?? "",
       email: user?.email ?? "",
       avatar: userImage,
+      id: user?.id ?? "",
     },
     navMain: [
       {
