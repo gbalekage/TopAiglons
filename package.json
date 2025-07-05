@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
-    "net": "next dev --turbopack --hostname 192.168.0.2",
+    "net": "next dev --turbopack --hostname 192.168.33.186",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"

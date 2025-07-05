@@ -253,7 +253,7 @@ export default function BlogSectionSlider() {
         </div>
 
         <div className="flex flex-wrap items-center justify-between gap-4">
-          <div className="flex hidden items-center mb-3 space-x-2 sm:flex">
+          <div className="flex items-center mb-3 space-x-2 sm:flex">
             <Button
               variant="outline"
               size="icon"
