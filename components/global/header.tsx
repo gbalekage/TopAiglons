@@ -42,7 +42,11 @@ const Header = () => {
     setToken: (token: string | null) => void;
   };
   const router = useRouter();
-  const userImage = user?.image || "";
+  const userImage = user?.image || (
+    <div className="w-6 h-6 bg-white rounded-full flex items-center justify-center">
+      <User2 className="w-6 h-6" />
+    </div>
+  );
 
   const handleLogout = () => {
     localStorage.removeItem("user");
@@ -144,7 +148,7 @@ const Header = () => {
               <DropdownMenuContent align="end" className="w-40">
                 <DropdownMenuItem
                   onClick={() =>
-                    router.push(user.role === "admin" ? "/admin" : "/client")
+                    router.push(user.role === "admin" ? "/admin/home" : "/client")
                   }
                 >
                   <User2 className="w-4 h-4 mr-2" />
