@@ -1,56 +1,19 @@
-import NextAuth, { NextAuthOptions, User as NextAuthUser } from "next-auth";
+import NextAuth from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { connectToDatabase } from "@/lib/db";
 import User from "@/models/User";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import { NextApiRequest, NextApiResponse } from "next";
 
-// Extend session and token types
-declare module "next-auth" {
-  interface Session {
-    token?: string;
-    user: {
-      id: string;
-      name?: string | null;
-      email: string;
-      role?: string;
-    };
-  }
-
-  interface User {
-    id?: string;
-    role?: string;
-  }
-}
-
-declare module "next-auth/jwt" {
-  interface JWT {
-    id?: string;
-    role?: string;
-    accessToken?: string;
-  }
-}
-
-// Helper functions
-const generateUniquePassword = () =>
-  `topaiglon-user${Math.floor(Math.random() * 1000)}`;
-
-const getClientIp = (req: NextApiRequest): string | null => {
-  const forwarded = req.headers["x-forwarded-for"];
-  if (typeof forwarded === "string") return forwarded.split(",")[0].trim();
-  if (req.socket?.remoteAddress) return req.socket.remoteAddress;
-  return null;
-};
-
-// Auth options
-const authOptions: NextAuthOptions = {
+// Auth config
+export const authOptions = {
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID!,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
     }),
+
     CredentialsProvider({
       name: "Credentials",
       credentials: {
@@ -77,7 +40,7 @@ const authOptions: NextAuthOptions = {
           action: "Credentials SignIn",
           timestamp: new Date(),
           device: req?.headers["user-agent"] || "Unknown Device",
-          location: getClientIp(req as NextApiRequest) || "Unknown IP",
+          location: "Unknown",
         });
         await user.save();
 
@@ -96,12 +59,15 @@ const authOptions: NextAuthOptions = {
   },
 
   callbacks: {
-    async signIn({ user, account, profile }) {
+    async signIn({ user, account }) {
       if (account?.provider === "google") {
         await connectToDatabase();
 
         let existingUser = await User.findOne({ email: user.email });
-        const hashedPassword = await bcrypt.hash(generateUniquePassword(), 10);
+        const hashedPassword = await bcrypt.hash(
+          `topaiglon-user${Math.floor(Math.random() * 1000)}`,
+          10
+        );
 
         if (!existingUser) {
           existingUser = await User.create({
@@ -171,7 +137,6 @@ const authOptions: NextAuthOptions = {
   secret: process.env.NEXTAUTH_SECRET,
 };
 
-const handler = async (req: NextApiRequest, res: NextApiResponse) =>
-  NextAuth(req, res, authOptions);
+const handler = NextAuth(authOptions);
 
 export { handler as GET, handler as POST };
