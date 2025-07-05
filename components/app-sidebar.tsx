@@ -33,6 +33,9 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import { useUser } from "@/contexts/user";
+import Logo from "./global/logo";
+import { useRouter } from "next/navigation";
+import { PlusCircle, Users } from "lucide-react";
 
 type User = {
   id: string;
@@ -58,16 +61,16 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       avatar: userImage,
       id: user?.id ?? "",
     },
-    navMain: [
+    navUsers: [
       {
-        title: "Dashboard",
-        url: "#",
-        icon: IconDashboard,
+        title: "Users",
+        url: "/admin/users/list",
+        icon: Users,
       },
       {
-        title: "Lifecycle",
-        url: "#",
-        icon: IconListDetails,
+        title: "Add User",
+        url: "/admin/users/add",
+        icon: PlusCircle,
       },
       {
         title: "Analytics",
@@ -85,6 +88,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         icon: IconUsers,
       },
     ],
+
     navClouds: [
       {
         title: "Capture",
@@ -169,6 +173,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     ],
   };
 
+  const router = useRouter();
+
   return (
     <Sidebar collapsible="offcanvas" {...props}>
       <SidebarHeader>
@@ -177,17 +183,15 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             <SidebarMenuButton
               asChild
               className="data-[slot=sidebar-menu-button]:!p-1.5"
+              onClick={() => router.push("/")}
             >
-              <a href="#">
-                <IconInnerShadowTop className="!size-5" />
-                <span className="text-base font-semibold">Acme Inc.</span>
-              </a>
+              <Logo variant="default" />
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={data.navMain} />
+        <NavMain items={data.navUsers} />
         <NavDocuments items={data.documents} />
         <NavSecondary items={data.navSecondary} className="mt-auto" />
       </SidebarContent>

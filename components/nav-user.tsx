@@ -34,7 +34,7 @@ type User = {
   id: string;
   name: string;
   email: string;
-  image: string;
+  image?: string;
 };
 
 export function NavUser({ user }: { user: User }) {

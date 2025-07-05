@@ -47,7 +47,7 @@ export function LoginForm({
           const role = session.user.role;
 
           if (role === "admin") {
-            router.push("/admin");
+            router.push("/admin/home");
           } else if (role === "client") {
             router.push("/client");
           } else {
@@ -83,7 +83,7 @@ export function LoginForm({
           const role = session.user.role;
 
           if (role === "admin") {
-            router.push("/admin");
+            router.push("/admin/home");
           } else if (role === "client") {
             router.push("/client");
           } else {
