@@ -221,7 +221,7 @@ export default function BlogSectionSlider() {
     <section className="py-12 md:py-20 lg:py-24">
       <div
         ref={containerRef}
-        className="container mx-auto space-y-6 px-4 md:space-y-8 md:px-6 2xl:max-w-[1400px]"
+        className="container mx-auto px-4 md:px-6 2xl:max-w-[1400px]"
       >
         <div className="section__head">
           <motion.p
@@ -253,15 +253,7 @@ export default function BlogSectionSlider() {
         </div>
 
         <div className="flex flex-wrap items-center justify-between gap-4">
-          {/* <div className="max-w-md space-y-1">
-            <h2 className="text-1xl font-bold tracking-tight md:text-2xl">
-              Latest Marketing Articles
-            </h2>
-            <p className="text-muted-foreground text-sm md:text-sm">
-              Stay updated with our most recent insights
-            </p>
-          </div> */}
-          <div className="flex hidden items-center space-x-2 sm:flex">
+          <div className="flex hidden items-center mb-3 space-x-2 sm:flex">
             <Button
               variant="outline"
               size="icon"
