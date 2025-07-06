@@ -16,8 +16,7 @@ type Props = {};
 
 const HomePage = (props: Props) => {
   return (
-    <>
-      <Header />
+  <>
       <Hero />
       <AboutSectionCompanyValues />
       <CardGroup />
@@ -28,7 +27,6 @@ const HomePage = (props: Props) => {
       <Blog />
       <Faq />
       <CallToAction />
-      <Footer />
     </>
   );
 };

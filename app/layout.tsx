@@ -3,6 +3,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { Toaster } from "sonner";
 import { ClientProviders } from "@/utils/ClientProviders";
+import Header from "@/components/global/header";
+import Footer from "@/components/global/footer";
 
 export const metadata: Metadata = {
   title: "TopAiglons - RDC",
@@ -18,7 +20,11 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body>
         <ClientProviders>
-          <main className="relative isolate overflow-hidden">{children}</main>
+          <main className="relative isolate overflow-hidden">
+            <Header /> 
+              {children}
+            <Footer />
+          </main>
         </ClientProviders>
         <Toaster position="top-center" richColors closeButton />
       </body>

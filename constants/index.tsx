@@ -48,25 +48,25 @@ export const navMenu: MenuItem[] = [
     label: "Services",
     submenu: [
       {
-        href: "/hosting",
+        href: "/services/hosting",
         icon: <ServerCrash />,
         label: "Hosting Services",
         desc: "Reliable and secure web hosting tailored to your needs.",
       },
       {
-        href: "/domains",
+        href: "/services/domain-names",
         icon: <StickerIcon />,
         label: "Domaine Names",
         desc: "Register and manage your unique domain name easily.",
       },
       {
-        href: "/graphic-design",
+        href: "/services/graphic-design",
         icon: <Palette />,
         label: "Graphic Design",
         desc: "Creative design services for your brand and marketing.",
       },
       {
-        href: "/fullStack-dev",
+        href: "/services/full-stack",
         icon: <Code />,
         label: "Full Stack Developement",
         desc: "Custom web and mobile development from frontend to backend.",
